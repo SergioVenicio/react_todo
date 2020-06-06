@@ -2,12 +2,17 @@
   "name": "backend",
   "version": "1.0.0",
   "description": "",
-  "main": "src/loarder.js",
+  "main": "src/loader.js",
   "scripts": {
     "dev": "nodemon",
     "production": "pm2 start src/loader.js --name todo-app"
   },
   "keywords": [],
+  "ignore": [
+    "*.test.js",
+    "dist/*",
+    "node_modules/*"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
