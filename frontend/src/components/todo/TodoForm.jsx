@@ -1,15 +1,37 @@
-import React from 'react'
+import axios from 'axios'
+
+import React, { useState } from 'react'
+import { connect } from 'react-redux'
+
+import { addTodo, setTodos } from '../../store/actions/todos'
 
 import Button from './Button'
 import Input from './Input'
 
-export default (props) => {
-  const keyHandler = (e) => {
-    if(e.key === 'Enter') {
-      e.shiftKey ? props.searchHandler(e) : props.addHandler(e)
-    } else if (e.key === 'Escape' || e.key === 'Delete') {
-      props.clearHandle(e)
-    }
+const TodoForm = (props) => {
+  const [description, setDescription] = useState('')
+
+  const addHandler = (e) => {
+    e.preventDefault()
+    axios({
+      method: 'POST',
+      url: props.baseUrl,
+      data: {description, done: false}
+    }).then( ({ data }) => {
+      props.addTodo(data)
+      setDescription('')
+    })
+  }
+
+  const searchHandler = (e) => {
+    e.preventDefault()
+    const url = description ? `${props.baseUrl}?description=${description}` : props.baseUrl
+    axios({
+      method: 'GET',
+      url
+    }).then( ({ data }) => {
+      props.setTodos(data)
+    })
   }
 
   return (
@@ -22,21 +44,20 @@ export default (props) => {
                 <div className="input-group">
                   <Input
                     placeholder='Nova tarefa'
-                    onChange={props.todoChange}
-                    value={props.description}
-                    onKeyUp={keyHandler}
+                    onChange={(e) => setDescription(e.target.value)}
+                    value={description}
                   />
                   <div className="input-group-append">
                     <Button
                       type="submit"
                       className="outline-primary"
-                      onClick={props.addHandler}
+                      onClick={addHandler}
                       icon='fa-plus'>
                     </Button>
                     <Button
                       type="submit"
                       className="outline-primary"
-                      onClick={props.searchHandler}
+                      onClick={searchHandler}
                       icon='fa-search'>
                     </Button>
                   </div>
@@ -49,3 +70,19 @@ export default (props) => {
     </div>
   )
 }
+
+const mapDispatchToProps = dispatch => {
+  return {
+    addTodo: todo => dispatch(addTodo(todo)),
+    setTodos: todos => dispatch(setTodos(todos))
+  }
+}
+
+const mapStateToProps = state => {
+  return {
+    todoList: state.todos.todoList,
+    baseUrl: state.todos.baseUrl
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(TodoForm)
